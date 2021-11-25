@@ -1,0 +1,80 @@
+---
+title: "ImmunH"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+```{r}
+# Load packages
+library(dplyr)
+library(ggplot2)
+library(ggsignif)
+```
+
+```{r}
+DR_data <- read.table("C:/Users/k1921462/OneDrive - King's College London/Documents/dose_response", header = TRUE)
+```
+
+
+```{r}
+print(max(DR_data$response))
+```
+
+```{r}
+DR_data <- mutate(DR_data, per_response = response/max(response)) %>% filter( dose > 0) %>% mutate(log_dose = log10(dose))
+```
+
+
+```{r}
+coef <- lm(DR_data$per_response ~ DR_data$log_dose)
+coef <- coef$coefficients
+```
+
+```{r}
+print(coef[1]) # intercept
+print(coef[2]) # slope
+
+
+
+equation <- paste0("y = ", round(coef[2],3), "*x + ", round(coef[1], 3))
+```
+
+
+
+```{r}
+eq <- 1
+
+ggplot(DR_data, aes(x = log_dose, y = per_response)) + geom_point() + 
+  geom_abline(slope = coef[2], intercept = coef[1], color = "red") +
+  ggtitle(equation)
+```
+
+```{r}
+data("mtcars")
+
+cardf <- data.frame(dep = as.character(mtcars$cyl), indep = mtcars$disp)
+```
+
+
+```{r}
+barplot <- ggplot(cardf, aes(x = dep, y = indep)) + 
+   geom_bar(stat="identity") +
+   geom_signif(comparisons = list(c("6", "8")), y_position = 5000)
+```
+
+
+```{r}
+barplot
+```
+
+
